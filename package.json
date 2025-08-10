@@ -9,7 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "artillery": "^2.0.21",
+    "dotenv": "^17.2.1",
     "socket.io": "^4.8.1"
   }
 }
