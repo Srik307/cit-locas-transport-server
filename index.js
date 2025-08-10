@@ -1,29 +1,41 @@
-const { Server } = require("socket.io");
+// index.js
+const express = require("express");
 const http = require("http");
-require("dotenv").config();
+const { Server } = require("socket.io");
+require("dotenv").config(); // Load environment variables
 
-const server = http.createServer();
+const app = express();
+const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", // Allow all origins for testing
   },
+  transports: ["websocket"], // Force WebSocket (no polling)
+  pingInterval: 25000,       // Keepalive settings
   pingTimeout: 60000,
-  pingInterval: 25000,
-  transports: ['websocket'],
-  allowEIO3: true,
+  maxHttpBufferSize: 1e6,    // 1MB max per message
 });
 
-
-
+// Handle socket connections
 io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
+  console.log(`✅ Client connected: ${socket.id}`);
 
-  // Listen for "ping" and reply with "broadcast"
-  socket.on("ping", (msg) => {
-    io.emit("broadcast", `Server says: ${msg}`);
+  socket.on("ping", (data) => {
+    // Echo back to client
+    socket.emit("pong", `Server got: ${data}`);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log(`❌ Client disconnected: ${socket.id} (${reason})`);
   });
 });
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log("Socket.IO server running on port " + (process.env.PORT || 3000));
+app.get("/", (req, res) => {
+  res.send("Socket.IO load test server is running 🚀");
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
