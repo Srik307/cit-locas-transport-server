@@ -1,0 +1,13 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 120
+      arrivalRate: 100    # lower concurrency to start
+    - duration: 120
+      arrivalRate: 300    # ramp up slowly
+scenarios:
+  - engine: "socketio"
+    flow:
+      - emit:
+          channel: "ping"
+          data: "hello"
